@@ -2,8 +2,6 @@ import Foundation
 import SwiftUI
 import PlaygroundSupport
 
-// MARK: - Model
-
 enum Genre: String, CaseIterable, Codable, Identifiable {
     case fiction
     case nonFiction
@@ -32,8 +30,6 @@ enum SearchQuery {
     case year(Int)
 }
 
-// MARK: - Errors
-
 enum LibraryError: Error, LocalizedError {
     case emptyTitle
     case emptyAuthor
@@ -52,16 +48,12 @@ enum LibraryError: Error, LocalizedError {
     }
 }
 
-// MARK: - Protocol
-
 protocol BookShelfProtocol {
     func add(_ book: Book) throws
     func delete(id: String) throws
     func list() -> [Book]
     func search(_ query: SearchQuery) -> [Book]
 }
-
-// MARK: - Service
 
 final class BookShelf: BookShelfProtocol {
     private var books: [Book] = []
@@ -132,8 +124,6 @@ final class BookShelf: BookShelfProtocol {
         )
     }
 }
-
-// MARK: - ViewModel
 
 enum SearchMode: String, CaseIterable, Identifiable {
     case title
@@ -270,8 +260,6 @@ final class BookShelfViewModel: ObservableObject {
     }
 }
 
-// MARK: - UI
-
 struct ContentView: View {
     @StateObject private var vm = BookShelfViewModel(shelf: BookShelf())
 
@@ -401,7 +389,7 @@ private struct BookCardView: View {
             Spacer()
             Button("Удалить") {
                 onDelete()
-          ]]  }
+            }
             .buttonStyle(.bordered)
         }
         .padding(8)
