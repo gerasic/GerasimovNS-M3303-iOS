@@ -1,12 +1,13 @@
 import UIKit
 
-final class AppCoordinator {
+final class AppCoordinator: Coordinator {
     private let window: UIWindow
     private let navigationController = UINavigationController()
 
     private let authRepository = StubAuthRepository()
     private let metricsRepository = StubMetricsRepository()
     private let entriesRepository = StubEntriesRepository()
+    private var childCoordinators: [Coordinator] = []
 
     init(window: UIWindow) {
         self.window = window
@@ -15,71 +16,42 @@ final class AppCoordinator {
     func start() {
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
-        showAuth()
+        startAuthFlow()
     }
 
-    func showAuth() {
-        let authService = DefaultAuthService(repository: authRepository)
-        let coordinator = AuthCoordinator(appCoordinator: self)
-        let viewModel = AuthViewModel(service: authService, router: coordinator)
-        let viewController = AuthViewController(viewModel: viewModel)
-
-        viewModel.view = viewController
-        navigationController.setViewControllers([viewController], animated: false)
-    }
-
-    func showEntriesList(userId: UserID) {
-        let entriesService = DefaultEntriesListService(
-            metricsRepository: metricsRepository,
-            entriesRepository: entriesRepository
+    private func startAuthFlow() {
+        let coordinator = AuthCoordinator(
+            navigationController: navigationController,
+            authRepository: authRepository
         )
-        let coordinator = EntriesListCoordinator(appCoordinator: self)
-        let viewModel = EntriesListViewModel(userId: userId, service: entriesService, router: coordinator)
-        let viewController = EntriesListViewController(viewModel: viewModel)
+        coordinator.onFinish = { [weak self, weak coordinator] userId in
+            guard let self else { return }
+            if let coordinator {
+                self.removeChild(coordinator)
+            }
+            self.startMainFlow(userId: userId)
+        }
 
-        viewModel.view = viewController
-        navigationController.setViewControllers([viewController], animated: true)
+        addChild(coordinator)
+        coordinator.start()
     }
 
-    func showTrackingSettings(userId: UserID) {
-        let service = DefaultTrackingSettingsService(metricsRepository: metricsRepository)
-        let coordinator = TrackingSettingsCoordinator(appCoordinator: self)
-        let viewModel = TrackingSettingsViewModel(userId: userId, service: service, router: coordinator)
-        let viewController = TrackingSettingsViewController(viewModel: viewModel)
-
-        viewModel.view = viewController
-        let modalNavigationController = UINavigationController(rootViewController: viewController)
-        navigationController.present(modalNavigationController, animated: true)
-    }
-
-    func showMetricDetails(userId: UserID, metricId: MetricID) {
-        let service = DefaultMetricDetailsService(
-            metricsRepository: metricsRepository,
-            entriesRepository: entriesRepository
-        )
-        let coordinator = MetricDetailsCoordinator(appCoordinator: self)
-        let viewModel = MetricDetailsViewModel(
+    private func startMainFlow(userId: UserID) {
+        let coordinator = EntriesListCoordinator(
+            navigationController: navigationController,
             userId: userId,
-            metricId: metricId,
-            service: service,
-            router: coordinator
+            metricsRepository: metricsRepository,
+            entriesRepository: entriesRepository
         )
-        let viewController = MetricDetailsViewController(viewModel: viewModel)
-
-        viewModel.view = viewController
-        navigationController.pushViewController(viewController, animated: true)
+        addChild(coordinator)
+        coordinator.start()
     }
 
-    func closePresentedScreen() {
-        navigationController.presentedViewController?.dismiss(animated: true)
+    private func addChild(_ coordinator: Coordinator) {
+        childCoordinators.append(coordinator)
     }
 
-    func closeDetailsScreen() {
-        navigationController.popViewController(animated: true)
-    }
-
-    func openEntry(entryId: EntryID) {
-        // Entry screen is out of scope for this lab. The navigation contract exists.
-        print("Open entry with id: \(entryId)")
+    private func removeChild(_ coordinator: Coordinator) {
+        childCoordinators.removeAll { $0 === coordinator }
     }
 }

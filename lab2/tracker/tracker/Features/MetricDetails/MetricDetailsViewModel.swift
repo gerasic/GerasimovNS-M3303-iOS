@@ -3,18 +3,19 @@ import Foundation
 @MainActor
 final class MetricDetailsViewModel: MetricDetailsViewModelInput {
     weak var view: MetricDetailsView?
+    var onOpenEntry: ((EntryID) -> Void)?
+    var onClose: (() -> Void)?
+    var onMetricUpdated: (() -> Void)?
 
     private let userId: UserID
     private let metricId: MetricID
     private let service: MetricDetailsService
-    private let router: MetricDetailsRouter
     private var range: ChartRange = .month
 
-    init(userId: UserID, metricId: MetricID, service: MetricDetailsService, router: MetricDetailsRouter) {
+    init(userId: UserID, metricId: MetricID, service: MetricDetailsService) {
         self.userId = userId
         self.metricId = metricId
         self.service = service
-        self.router = router
     }
 
     func didLoad() {
@@ -32,6 +33,7 @@ final class MetricDetailsViewModel: MetricDetailsViewModelInput {
                     value: value,
                     recordedAt: recordedAt
                 )
+                onMetricUpdated?()
                 load(range: range)
             } catch {
                 view?.render(.error(message: "Не удалось сохранить значение"))
@@ -45,6 +47,7 @@ final class MetricDetailsViewModel: MetricDetailsViewModelInput {
         Task {
             do {
                 try await service.updateMetricTag(userId: userId, metricId: metricId, tagId: tagId)
+                onMetricUpdated?()
                 load(range: range)
             } catch {
                 view?.render(.error(message: "Не удалось изменить тег"))
@@ -58,11 +61,11 @@ final class MetricDetailsViewModel: MetricDetailsViewModelInput {
     }
 
     func didTapPoint(entryId: EntryID) {
-        router.openEntry(entryId: entryId)
+        onOpenEntry?(entryId)
     }
 
     func didTapBack() {
-        router.close()
+        onClose?()
     }
 
     private func load(range: ChartRange) {

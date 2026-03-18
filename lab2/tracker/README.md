@@ -54,7 +54,7 @@
 - каждый экран оформлен как отдельная фича: `EntriesList`, `TrackingSettings`, `MetricDetails`;
 - внутри фичи лежат `ViewController`, `ViewModel`, экранные модели и навигация;
 - `ViewModel` управляет состоянием экрана и реакцией на действия пользователя;
-- `Coordinator` отвечает за переходы между экранами;
+- `Coordinator` отвечает за переходы между экранами и жизненный цикл flow;
 - общие сервисы, репозитории и только действительно общие доменные сущности вынесены в `Core`.
 
 **Почему выбрана именно она:**
@@ -257,7 +257,7 @@
 
 Принципы:
 - `UIKit` допустим только на уровне `View`;
-- у каждого экрана свой набор `View` / `ViewModel` / `Router`;
+- у каждого экрана свой набор `View` / `ViewModel`, а навигация вынесена в coordinator tree;
 - общая логика доступа к данным вынесена в сервисы и репозитории из `Core`;
 - проект организован по экранам, а не по глобальным слоям `Presentation / Domain / Data`.
 
@@ -415,31 +415,26 @@ protocol EntriesRepository {
 Навигация вынесена отдельно, чтобы переходы между экранами не жили в `ViewController` и `ViewModel`.
 
 ```swift
-protocol AuthRouter: AnyObject {
-    func openEntriesList(userId: UserID)
+protocol Coordinator: AnyObject {
+    func start()
 }
 
-protocol EntriesListRouter: AnyObject {
-    func openTrackingSettings(userId: UserID)
-    func openMetricDetails(userId: UserID, metricId: MetricID)
+final class AppCoordinator: Coordinator {
+    private var childCoordinators: [Coordinator] = []
 }
 
-protocol TrackingSettingsRouter: AnyObject {
-    func closeWithSavedProfile(_ profile: TrackingProfile)
-    func close()
-}
-
-protocol MetricDetailsRouter: AnyObject {
-    func openEntry(entryId: EntryID)
-    func close()
-}
+final class AuthCoordinator: Coordinator { }
+final class EntriesListCoordinator: Coordinator { }
+final class TrackingSettingsCoordinator: Coordinator { }
+final class MetricDetailsCoordinator: Coordinator { }
 ```
 
 Что это значит в проекте:
-- `AuthRouter` открывает главный экран после успешного входа или восстановления сессии.
-- `EntriesListRouter` открывает настройки метрик и экран деталей.
-- `TrackingSettingsRouter` закрывает экран после сохранения или отмены.
-- `MetricDetailsRouter` открывает связанную запись из графика или закрывает детали.
+- `AppCoordinator` является единственной точкой входа и управляет верхнеуровневыми flow.
+- `AuthCoordinator` отвечает только за flow авторизации.
+- `EntriesListCoordinator` управляет главным экраном и запускает дочерние flow для настроек и деталей.
+- `TrackingSettingsCoordinator` и `MetricDetailsCoordinator` живут как настоящие child coordinator'ы, а не как router-прокси.
+- `ViewModel` не знают ни про `UIKit`, ни про coordinator'ы напрямую: они отдают события наружу через callbacks.
 
 ## Структура папок
 ```text
@@ -462,7 +457,6 @@ lab2/
           EntriesListViewState.swift
         EntriesListViewController.swift
         EntriesListViewModel.swift
-        EntriesListCoordinator.swift
       TrackingSettings/
         Models/
           MetricTemplate.swift
@@ -485,6 +479,8 @@ lab2/
       Networking/
       UI/
     App/
+      Coordinator.swift
       AppCoordinator.swift
+      EntriesListCoordinator.swift
       DI/
 ```

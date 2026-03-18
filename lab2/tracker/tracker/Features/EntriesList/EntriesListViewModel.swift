@@ -3,15 +3,15 @@ import Foundation
 @MainActor
 final class EntriesListViewModel: EntriesListViewModelInput {
     weak var view: EntriesListView?
+    var onOpenTrackingSettings: ((UserID) -> Void)?
+    var onOpenMetricDetails: ((UserID, MetricID) -> Void)?
 
     private let userId: UserID
     private let service: EntriesListService
-    private let router: EntriesListRouter
 
-    init(userId: UserID, service: EntriesListService, router: EntriesListRouter) {
+    init(userId: UserID, service: EntriesListService) {
         self.userId = userId
         self.service = service
-        self.router = router
     }
 
     func didLoad() {
@@ -28,11 +28,11 @@ final class EntriesListViewModel: EntriesListViewModelInput {
     }
 
     func didTapEditMetrics() {
-        router.openTrackingSettings(userId: userId)
+        onOpenTrackingSettings?(userId)
     }
 
     func didTapMetric(metricId: MetricID) {
-        router.openMetricDetails(userId: userId, metricId: metricId)
+        onOpenMetricDetails?(userId, metricId)
     }
 
     func didTapAddValue(metricId: MetricID, value: Double, recordedAt: Date) {

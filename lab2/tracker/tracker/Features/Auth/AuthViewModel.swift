@@ -1,22 +1,21 @@
 @MainActor
 final class AuthViewModel: AuthViewModelInput {
     weak var view: AuthView?
+    var onAuthenticated: ((UserID) -> Void)?
 
     private let service: AuthService
-    private let router: AuthRouter
     private var email = ""
     private var password = ""
 
-    init(service: AuthService, router: AuthRouter) {
+    init(service: AuthService) {
         self.service = service
-        self.router = router
     }
 
     func didLoad() {
         Task {
             if let session = try? await service.restoreSession() {
                 view?.render(.content(session: session))
-                router.openEntriesList(userId: session.userId)
+                onAuthenticated?(session.userId)
             } else {
                 view?.render(.initial)
             }
@@ -40,7 +39,7 @@ final class AuthViewModel: AuthViewModelInput {
             do {
                 let session = try await service.login(request: LoginRequest(email: email, password: password))
                 view?.render(.content(session: session))
-                router.openEntriesList(userId: session.userId)
+                onAuthenticated?(session.userId)
             } catch {
                 view?.render(.error(message: "Не удалось выполнить вход"))
             }

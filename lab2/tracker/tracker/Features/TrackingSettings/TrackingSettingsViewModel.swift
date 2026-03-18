@@ -1,17 +1,17 @@
 @MainActor
 final class TrackingSettingsViewModel: TrackingSettingsViewModelInput {
     weak var view: TrackingSettingsView?
+    var onClose: (() -> Void)?
+    var onSavedProfile: ((TrackingProfile) -> Void)?
 
     private let userId: UserID
     private let service: TrackingSettingsService
-    private let router: TrackingSettingsRouter
     private var profile: TrackingProfile = .empty
     private var templates: [MetricTemplate] = []
 
-    init(userId: UserID, service: TrackingSettingsService, router: TrackingSettingsRouter) {
+    init(userId: UserID, service: TrackingSettingsService) {
         self.userId = userId
         self.service = service
-        self.router = router
     }
 
     func didLoad() {
@@ -48,7 +48,7 @@ final class TrackingSettingsViewModel: TrackingSettingsViewModelInput {
         Task {
             do {
                 try await service.saveProfile(userId: userId, profile: profile)
-                router.closeWithSavedProfile(profile)
+                onSavedProfile?(profile)
             } catch {
                 view?.render(.error(message: "Не удалось сохранить профиль"))
             }
@@ -56,6 +56,6 @@ final class TrackingSettingsViewModel: TrackingSettingsViewModelInput {
     }
 
     func didTapBack() {
-        router.close()
+        onClose?()
     }
 }

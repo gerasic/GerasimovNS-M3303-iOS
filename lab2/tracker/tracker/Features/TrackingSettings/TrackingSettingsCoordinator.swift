@@ -1,15 +1,42 @@
-final class TrackingSettingsCoordinator: TrackingSettingsRouter {
-    private weak var appCoordinator: AppCoordinator?
+import UIKit
 
-    init(appCoordinator: AppCoordinator) {
-        self.appCoordinator = appCoordinator
+final class TrackingSettingsCoordinator: Coordinator {
+    var onFinish: ((Bool) -> Void)?
+
+    private let navigationController: UINavigationController
+    private let userId: UserID
+    private let metricsRepository: MetricsRepository
+
+    init(
+        navigationController: UINavigationController,
+        userId: UserID,
+        metricsRepository: MetricsRepository
+    ) {
+        self.navigationController = navigationController
+        self.userId = userId
+        self.metricsRepository = metricsRepository
     }
 
-    func closeWithSavedProfile(_ profile: TrackingProfile) {
-        appCoordinator?.closePresentedScreen()
+    func start() {
+        let service = DefaultTrackingSettingsService(metricsRepository: metricsRepository)
+        let viewModel = TrackingSettingsViewModel(userId: userId, service: service)
+        let viewController = TrackingSettingsViewController(viewModel: viewModel)
+
+        viewModel.view = viewController
+        viewModel.onClose = { [weak self] in
+            self?.finish(didSave: false)
+        }
+        viewModel.onSavedProfile = { [weak self] _ in
+            self?.finish(didSave: true)
+        }
+
+        let modalNavigationController = UINavigationController(rootViewController: viewController)
+        navigationController.present(modalNavigationController, animated: true)
     }
 
-    func close() {
-        appCoordinator?.closePresentedScreen()
+    private func finish(didSave: Bool) {
+        navigationController.presentedViewController?.dismiss(animated: true) { [weak self] in
+            self?.onFinish?(didSave)
+        }
     }
 }
