@@ -2,10 +2,19 @@ import Foundation
 
 @MainActor
 final class MetricDetailsViewModel: MetricDetailsViewModelInput {
-    weak var view: MetricDetailsView?
+    weak var view: MetricDetailsView? {
+        didSet {
+            renderCurrentState()
+        }
+    }
     var onOpenEntry: ((EntryID) -> Void)?
     var onClose: (() -> Void)?
     var onMetricUpdated: (() -> Void)?
+    private(set) var state: MetricDetailsViewState = .initial {
+        didSet {
+            renderCurrentState()
+        }
+    }
 
     private let userId: UserID
     private let metricId: MetricID
@@ -23,7 +32,7 @@ final class MetricDetailsViewModel: MetricDetailsViewModelInput {
     }
 
     func didTapSaveValue(_ value: Double, recordedAt: Date) {
-        view?.render(.saving)
+        state = .saving
 
         Task {
             do {
@@ -36,13 +45,13 @@ final class MetricDetailsViewModel: MetricDetailsViewModelInput {
                 onMetricUpdated?()
                 load(range: range)
             } catch {
-                view?.render(.error(message: "Не удалось сохранить значение"))
+                state = .error(message: "Не удалось сохранить значение")
             }
         }
     }
 
     func didChangeMetricTag(tagId: TagID) {
-        view?.render(.saving)
+        state = .saving
 
         Task {
             do {
@@ -50,7 +59,7 @@ final class MetricDetailsViewModel: MetricDetailsViewModelInput {
                 onMetricUpdated?()
                 load(range: range)
             } catch {
-                view?.render(.error(message: "Не удалось изменить тег"))
+                state = .error(message: "Не удалось изменить тег")
             }
         }
     }
@@ -69,27 +78,29 @@ final class MetricDetailsViewModel: MetricDetailsViewModelInput {
     }
 
     private func load(range: ChartRange) {
-        view?.render(.loading)
+        state = .loading
 
         Task {
             do {
                 let details = try await service.loadMetricDetails(userId: userId, metricId: metricId, range: range)
                 if details.points.isEmpty {
-                    view?.render(.empty)
+                    state = .empty
                 } else {
-                    view?.render(
-                        .content(
-                            metric: details.metric,
-                            lastValue: details.lastValue,
-                            points: details.points,
-                            range: range,
-                            tags: details.tags
-                        )
+                    state = .content(
+                        metric: details.metric,
+                        lastValue: details.lastValue,
+                        points: details.points,
+                        range: range,
+                        tags: details.tags
                     )
                 }
             } catch {
-                view?.render(.error(message: "Не удалось загрузить данные метрики"))
+                state = .error(message: "Не удалось загрузить данные метрики")
             }
         }
+    }
+
+    private func renderCurrentState() {
+        view?.render(state)
     }
 }

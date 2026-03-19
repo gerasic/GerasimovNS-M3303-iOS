@@ -1,7 +1,16 @@
 @MainActor
 final class AuthViewModel: AuthViewModelInput {
-    weak var view: AuthView?
+    weak var view: AuthView? {
+        didSet {
+            renderCurrentState()
+        }
+    }
     var onAuthenticated: ((UserID) -> Void)?
+    private(set) var state: AuthViewState = .initial {
+        didSet {
+            renderCurrentState()
+        }
+    }
 
     private let service: AuthService
     private var email = ""
@@ -14,35 +23,41 @@ final class AuthViewModel: AuthViewModelInput {
     func didLoad() {
         Task {
             if let session = try? await service.restoreSession() {
-                view?.render(.content(session: session))
+                state = .content(session: session)
                 onAuthenticated?(session.userId)
             } else {
-                view?.render(.initial)
+                state = .initial
             }
         }
     }
 
     func didChangeEmail(_ email: String) {
         self.email = email
-        view?.render(.editing(email: self.email, password: password))
+        state = .editing(email: self.email, password: password)
     }
 
     func didChangePassword(_ password: String) {
         self.password = password
-        view?.render(.editing(email: email, password: self.password))
+        state = .editing(email: email, password: self.password)
     }
 
     func didTapLogin(email: String, password: String) {
-        view?.render(.loading)
+        self.email = email
+        self.password = password
+        state = .loading
 
         Task {
             do {
                 let session = try await service.login(request: LoginRequest(email: email, password: password))
-                view?.render(.content(session: session))
+                state = .content(session: session)
                 onAuthenticated?(session.userId)
             } catch {
-                view?.render(.error(message: "Не удалось выполнить вход"))
+                state = .error(message: "Не удалось выполнить вход")
             }
         }
+    }
+
+    private func renderCurrentState() {
+        view?.render(state)
     }
 }

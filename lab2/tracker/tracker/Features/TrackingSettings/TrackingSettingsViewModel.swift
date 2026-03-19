@@ -1,8 +1,17 @@
 @MainActor
 final class TrackingSettingsViewModel: TrackingSettingsViewModelInput {
-    weak var view: TrackingSettingsView?
+    weak var view: TrackingSettingsView? {
+        didSet {
+            renderCurrentState()
+        }
+    }
     var onClose: (() -> Void)?
     var onSavedProfile: ((TrackingProfile) -> Void)?
+    private(set) var state: TrackingSettingsViewState = .initial {
+        didSet {
+            renderCurrentState()
+        }
+    }
 
     private let userId: UserID
     private let service: TrackingSettingsService
@@ -15,7 +24,7 @@ final class TrackingSettingsViewModel: TrackingSettingsViewModelInput {
     }
 
     func didLoad() {
-        view?.render(.loading)
+        state = .loading
 
         Task {
             do {
@@ -23,9 +32,9 @@ final class TrackingSettingsViewModel: TrackingSettingsViewModelInput {
                 async let templatesTask = service.loadMetricTemplates()
                 profile = try await profileTask
                 templates = try await templatesTask
-                view?.render(.content(profile: profile, templates: templates, tags: profile.tags))
+                state = .content(profile: profile, templates: templates, tags: profile.tags)
             } catch {
-                view?.render(.error(message: "Не удалось загрузить настройки"))
+                state = .error(message: "Не удалось загрузить настройки")
             }
         }
     }
@@ -43,19 +52,23 @@ final class TrackingSettingsViewModel: TrackingSettingsViewModelInput {
     }
 
     func didTapSave() {
-        view?.render(.saving)
+        state = .saving
 
         Task {
             do {
                 try await service.saveProfile(userId: userId, profile: profile)
                 onSavedProfile?(profile)
             } catch {
-                view?.render(.error(message: "Не удалось сохранить профиль"))
+                state = .error(message: "Не удалось сохранить профиль")
             }
         }
     }
 
     func didTapBack() {
         onClose?()
+    }
+
+    private func renderCurrentState() {
+        view?.render(state)
     }
 }
