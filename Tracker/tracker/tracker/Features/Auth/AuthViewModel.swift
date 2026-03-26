@@ -51,8 +51,10 @@ final class AuthViewModel: AuthViewModelInput {
                 let session = try await service.login(request: LoginRequest(email: email, password: password))
                 state = .content(session: session)
                 onAuthenticated?(session.userId)
+            } catch AuthError.invalidCredentials {
+                state = .error(message: "Invalid login or password.")
             } catch {
-                state = .error(message: "Не удалось выполнить вход")
+                state = .error(message: "Something went wrong. Please try again.")
             }
         }
     }
