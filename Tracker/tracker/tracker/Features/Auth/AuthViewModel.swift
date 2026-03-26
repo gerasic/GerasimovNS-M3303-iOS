@@ -31,17 +31,20 @@ final class AuthViewModel: AuthViewModelInput {
         }
     }
 
-    func didChangeEmail(_ email: String) {
-        self.email = email
+    func didChangeEmail(_ email: String?) {
+        self.email = email ?? ""
         state = .editing(email: self.email, password: password)
     }
 
-    func didChangePassword(_ password: String) {
-        self.password = password
+    func didChangePassword(_ password: String?) {
+        self.password = password ?? ""
         state = .editing(email: email, password: self.password)
     }
 
-    func didTapLogin(email: String, password: String) {
+    func didTapLogin(email: String?, password: String?) {
+        let email = email ?? ""
+        let password = password ?? ""
+
         self.email = email
         self.password = password
         state = .loading

@@ -170,17 +170,17 @@ final class AuthViewController: UIViewController, AuthView {
     }
 
     @objc private func didChangeEmail() {
-        viewModel.didChangeEmail(emailTextField.text ?? "")
+        viewModel.didChangeEmail(emailTextField.text)
     }
 
     @objc private func didChangePassword() {
-        viewModel.didChangePassword(passwordTextField.text ?? "")
+        viewModel.didChangePassword(passwordTextField.text)
     }
 
     @objc private func didTapLogin() {
         viewModel.didTapLogin(
-            email: emailTextField.text ?? "",
-            password: passwordTextField.text ?? ""
+            email: emailTextField.text,
+            password: passwordTextField.text
         )
     }
 
