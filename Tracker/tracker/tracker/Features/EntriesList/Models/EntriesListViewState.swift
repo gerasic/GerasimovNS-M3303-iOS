@@ -2,6 +2,6 @@ enum EntriesListViewState: Equatable {
     case initial
     case loading
     case empty
-    case content(sections: [MetricSection])
+    case content(sections: [EntriesListSectionViewModel])
     case error(message: String)
 }

@@ -6,7 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		74005B922F7C5556005BA668 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7476C8DF2F604E10004559BE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7476C8E62F604E10004559BE;
+			remoteInfo = tracker;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		74005B8E2F7C5556005BA668 /* trackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = trackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7476C8E72F604E10004559BE /* tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -21,6 +32,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		74005B8F2F7C5556005BA668 /* trackerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = trackerTests;
+			sourceTree = "<group>";
+		};
 		7476C8E92F604E10004559BE /* tracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,6 +48,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		74005B8B2F7C5556005BA668 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7476C8E42F604E10004559BE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				7476C8E92F604E10004559BE /* tracker */,
+				74005B8F2F7C5556005BA668 /* trackerTests */,
 				7476C8E82F604E10004559BE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				7476C8E72F604E10004559BE /* tracker.app */,
+				74005B8E2F7C5556005BA668 /* trackerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,6 +86,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		74005B8D2F7C5556005BA668 /* trackerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 74005B962F7C5556005BA668 /* Build configuration list for PBXNativeTarget "trackerTests" */;
+			buildPhases = (
+				74005B8A2F7C5556005BA668 /* Sources */,
+				74005B8B2F7C5556005BA668 /* Frameworks */,
+				74005B8C2F7C5556005BA668 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				74005B932F7C5556005BA668 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				74005B8F2F7C5556005BA668 /* trackerTests */,
+			);
+			name = trackerTests;
+			packageProductDependencies = (
+			);
+			productName = trackerTests;
+			productReference = 74005B8E2F7C5556005BA668 /* trackerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		7476C8E62F604E10004559BE /* tracker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7476C8FA2F604E11004559BE /* Build configuration list for PBXNativeTarget "tracker" */;
@@ -93,6 +141,10 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					74005B8D2F7C5556005BA668 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 7476C8E62F604E10004559BE;
+					};
 					7476C8E62F604E10004559BE = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -113,11 +165,19 @@
 			projectRoot = "";
 			targets = (
 				7476C8E62F604E10004559BE /* tracker */,
+				74005B8D2F7C5556005BA668 /* trackerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		74005B8C2F7C5556005BA668 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7476C8E52F604E10004559BE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +188,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		74005B8A2F7C5556005BA668 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7476C8E32F604E10004559BE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +204,55 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		74005B932F7C5556005BA668 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7476C8E62F604E10004559BE /* tracker */;
+			targetProxy = 74005B922F7C5556005BA668 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		74005B942F7C5556005BA668 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gerasimov.trackerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tracker";
+			};
+			name = Debug;
+		};
+		74005B952F7C5556005BA668 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gerasimov.trackerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tracker";
+			};
+			name = Release;
+		};
 		7476C8FB2F604E11004559BE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -320,6 +435,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		74005B962F7C5556005BA668 /* Build configuration list for PBXNativeTarget "trackerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				74005B942F7C5556005BA668 /* Debug */,
+				74005B952F7C5556005BA668 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		7476C8E22F604E10004559BE /* Build configuration list for PBXProject "tracker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

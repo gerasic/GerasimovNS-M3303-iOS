@@ -5,7 +5,8 @@ final class AppCoordinator: Coordinator {
     private let navigationController = UINavigationController()
 
     private let authRepository = StubAuthRepository()
-    private let metricsRepository = StubMetricsRepository()
+    private let networkClient = URLSessionNetworkClient()
+    private lazy var metricsRepository: MetricsRepository = RemoteMetricsRepository(networkClient: networkClient)
     private let entriesRepository = StubEntriesRepository()
     private var childCoordinators: [Coordinator] = []
 
