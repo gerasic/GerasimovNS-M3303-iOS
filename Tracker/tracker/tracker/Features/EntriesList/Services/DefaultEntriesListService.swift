@@ -9,15 +9,8 @@ final class DefaultEntriesListService: EntriesListService {
         self.entriesRepository = entriesRepository
     }
 
-    func loadSections(userId: UserID) async throws -> [MetricSection] {
-        let profile = try await metricsRepository.fetchTrackingProfile(userId: userId)
-        return profile.tags.map { tag in
-            MetricSection(
-                tag: tag,
-                metrics: profile.metrics.filter { $0.tagId == tag.id },
-                isCollapsed: false
-            )
-        }
+    func loadTrackingProfile(userId: UserID) async throws -> TrackingProfile {
+        try await metricsRepository.fetchTrackingProfile(userId: userId)
     }
 
     func saveMetricValue(userId: UserID, metricId: MetricID, value: Double, recordedAt: Date) async throws {
