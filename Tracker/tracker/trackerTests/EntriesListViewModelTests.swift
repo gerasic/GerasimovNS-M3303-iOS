@@ -49,12 +49,14 @@ struct EntriesListViewModelTests {
         viewModel.didLoad()
         await waitForTasks()
 
-        guard case let .error(message) = viewModel.state else {
+        guard case let .error(errorViewModel) = viewModel.state else {
             Issue.record("Expected error state for transport failure")
             return
         }
 
-        #expect(message == "Please check your internet connection")
+        #expect(errorViewModel.title == "Connection Error")
+        #expect(errorViewModel.message == "Please check your internet connection")
+        #expect(errorViewModel.actionTitle == "Retry")
     }
 
     @Test

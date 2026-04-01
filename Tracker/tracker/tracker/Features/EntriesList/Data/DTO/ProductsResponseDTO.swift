@@ -1,3 +1,3 @@
-struct ProductsResponseDTO: Codable {
+struct ProductsResponseDTO: Decodable {
     let products: [ProductDTO]
 }

@@ -36,7 +36,7 @@ final class EntriesListViewModel: EntriesListViewModelInput {
                 let sections = makeSectionViewModels(from: profile)
                 state = sections.isEmpty ? .empty : .content(sections: sections)
             } catch {
-                state = .error(message: makeErrorMessage(from: error))
+                state = .error(makeErrorViewModel(from: error))
             }
         }
     }
@@ -114,18 +114,47 @@ final class EntriesListViewModel: EntriesListViewModelInput {
         return String(format: "%.2f", value)
     }
 
-    private func makeErrorMessage(from error: Error) -> String {
+    private func mapError(_ error: Error) -> EntriesListError {
         guard let networkError = error as? NetworkError else {
-            return "Failed to load metrics"
+            return .unknown
         }
 
         switch networkError {
         case .transport:
-            return "Please check your internet connection"
+            return .noInternet
         case .httpStatus:
-            return "The service is temporarily unavailable"
+            return .serviceUnavailable
         case .invalidResponse, .decoding:
-            return "Failed to process server data"
+            return .invalidData
+        }
+    }
+
+    private func makeErrorViewModel(from error: Error) -> EntriesListErrorViewModel {
+        switch mapError(error) {
+        case .noInternet:
+            return EntriesListErrorViewModel(
+                title: "Connection Error",
+                message: "Please check your internet connection",
+                actionTitle: "Retry"
+            )
+        case .serviceUnavailable:
+            return EntriesListErrorViewModel(
+                title: "Service Unavailable",
+                message: "The service is temporarily unavailable",
+                actionTitle: "Retry"
+            )
+        case .invalidData:
+            return EntriesListErrorViewModel(
+                title: "Invalid Data",
+                message: "Failed to process server data",
+                actionTitle: "Retry"
+            )
+        case .unknown:
+            return EntriesListErrorViewModel(
+                title: "Unknown Error",
+                message: "Failed to load metrics",
+                actionTitle: "Retry"
+            )
         }
     }
 }

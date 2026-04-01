@@ -3,5 +3,5 @@ enum EntriesListViewState: Equatable {
     case loading
     case empty
     case content(sections: [EntriesListSectionViewModel])
-    case error(message: String)
+    case error(EntriesListErrorViewModel)
 }

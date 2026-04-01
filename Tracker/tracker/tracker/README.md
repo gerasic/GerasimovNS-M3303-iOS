@@ -61,9 +61,12 @@
 
 ### Обработка ошибок
 
-- ошибка сети -> `Проверьте подключение к интернету`
-- ошибка HTTP-статуса -> `Сервис временно недоступен`
-- ошибка декодинга/некорректного ответа -> `Не удалось обработать данные сервера`
+- низкий уровень: `NetworkError`
+- фича-уровень: `EntriesListError`
+- presentation уровень: `EntriesListErrorViewModel`
+- ошибка сети -> `Connection Error` / `Please check your internet connection`
+- ошибка HTTP-статуса -> `Service Unavailable` / `The service is temporarily unavailable`
+- ошибка декодинга/некорректного ответа -> `Invalid Data` / `Failed to process server data`
 
 ### Как проверить
 
