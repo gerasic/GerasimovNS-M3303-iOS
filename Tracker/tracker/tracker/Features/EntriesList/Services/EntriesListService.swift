@@ -1,6 +1,6 @@
 import Foundation
 
 protocol EntriesListService {
-    func loadSections(userId: UserID) async throws -> [MetricSection]
+    func loadTrackingProfile(userId: UserID) async throws -> TrackingProfile
     func saveMetricValue(userId: UserID, metricId: MetricID, value: Double, recordedAt: Date) async throws
 }

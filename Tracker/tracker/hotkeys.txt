@@ -1,0 +1,17 @@
+Command + Click по символу
+перейти к определению
+
+Control + Command + Left Arrow
+назад по истории переходов
+
+Control + Command + Right Arrow
+вперёд по истории переходов
+
+Command + Shift + O
+быстро открыть файл / тип / символ по имени
+
+Command + Control + J
+показать текущий файл в Project Navigator
+
+Command + L
+перейти к строке
