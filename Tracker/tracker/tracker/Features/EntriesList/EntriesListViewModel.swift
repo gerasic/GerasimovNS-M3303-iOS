@@ -17,6 +17,9 @@ final class EntriesListViewModel: EntriesListViewModelInput {
 
     private let userId: UserID
     private let service: EntriesListService
+    
+    private var trackingProfile: TrackingProfile = .empty
+    private var collapsedTagIDs = Set<TagID>()
 
     init(userId: UserID, service: EntriesListService) {
         self.userId = userId
@@ -28,10 +31,12 @@ final class EntriesListViewModel: EntriesListViewModelInput {
 
         Task {
             do {
-                let sections = try await service.loadSections(userId: userId)
+                let profile = try await service.loadTrackingProfile(userId: userId)
+                trackingProfile = profile
+                let sections = makeSectionViewModels(from: profile)
                 state = sections.isEmpty ? .empty : .content(sections: sections)
             } catch {
-                state = .error(message: "Не удалось загрузить метрики")
+                state = .error(makeErrorViewModel(from: error))
             }
         }
     }
@@ -57,10 +62,99 @@ final class EntriesListViewModel: EntriesListViewModelInput {
     }
 
     func didToggleSection(tagId: TagID) {
-        didLoad()
+        if collapsedTagIDs.contains(tagId) {
+            collapsedTagIDs.remove(tagId)
+        } else {
+            collapsedTagIDs.insert(tagId)
+        }
+
+        let sections = makeSectionViewModels(from: trackingProfile)
+        state = sections.isEmpty ? .empty : .content(sections: sections)
     }
 
     private func renderCurrentState() {
         view?.render(state)
+    }
+
+    private func makeSectionViewModels(from profile: TrackingProfile) -> [EntriesListSectionViewModel] {
+        profile.tags.map { tag in
+            let isCollapsed = collapsedTagIDs.contains(tag.id)
+            let metrics = profile.metrics.filter { $0.tagId == tag.id }
+
+            let items: [EntriesListMetricCellViewModel] = metrics.map { metric in
+                let isFilledToday = metric.currentValue != nil
+
+                return EntriesListMetricCellViewModel(
+                    id: metric.id,
+                    title: metric.title,
+                    todayValueText: formatValue(metric.currentValue) ?? "Не заполнено",
+                    unitText: metric.unit,
+                    isFilledToday: isFilledToday
+                )
+            }
+
+            return EntriesListSectionViewModel(
+                id: tag.id,
+                title: tag.title,
+                isCollapsed: isCollapsed,
+                items: isCollapsed ? [EntriesListMetricCellViewModel]() : items
+            )
+        }
+    }
+
+    private func formatValue(_ value: Double?) -> String? {
+        guard let value else {
+            return nil
+        }
+
+        if value.rounded() == value {
+            return String(Int(value))
+        }
+
+        return String(format: "%.2f", value)
+    }
+
+    private func mapError(_ error: Error) -> EntriesListError {
+        guard let networkError = error as? NetworkError else {
+            return .unknown
+        }
+
+        switch networkError {
+        case .transport:
+            return .noInternet
+        case .httpStatus:
+            return .serviceUnavailable
+        case .invalidResponse, .decoding:
+            return .invalidData
+        }
+    }
+
+    private func makeErrorViewModel(from error: Error) -> EntriesListErrorViewModel {
+        switch mapError(error) {
+        case .noInternet:
+            return EntriesListErrorViewModel(
+                title: "Connection Error",
+                message: "Please check your internet connection",
+                actionTitle: "Retry"
+            )
+        case .serviceUnavailable:
+            return EntriesListErrorViewModel(
+                title: "Service Unavailable",
+                message: "The service is temporarily unavailable",
+                actionTitle: "Retry"
+            )
+        case .invalidData:
+            return EntriesListErrorViewModel(
+                title: "Invalid Data",
+                message: "Failed to process server data",
+                actionTitle: "Retry"
+            )
+        case .unknown:
+            return EntriesListErrorViewModel(
+                title: "Unknown Error",
+                message: "Failed to load metrics",
+                actionTitle: "Retry"
+            )
+        }
     }
 }
