@@ -4,11 +4,9 @@ final class EntriesListViewController: UIViewController, EntriesListView {
     private let viewModel: EntriesListViewModelInput
     private let collectionView: UICollectionView
     private let collectionManager = EntriesListCollectionManager()
-    private let activityIndicatorView = UIActivityIndicatorView(style: .large)
-    private let emptyLabel = UILabel()
-    private let errorTitleLabel = UILabel()
-    private let errorMessageLabel = UILabel()
-    private let retryButton = UIButton(type: .system)
+    private let loadingView = DSLoadingView()
+    private let emptyView = DSEmptyView()
+    private let errorView = DSErrorView()
 
     init(viewModel: EntriesListViewModelInput) {
         self.viewModel = viewModel
@@ -28,7 +26,7 @@ final class EntriesListViewController: UIViewController, EntriesListView {
         super.viewDidLoad()
 
         title = "Metrics"
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = DS.Colors.background
 
         setupCollectionView()
         setupCollectionManager()
@@ -87,112 +85,82 @@ final class EntriesListViewController: UIViewController, EntriesListView {
     }
 
     private func setupStateViews() {
-        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
-        emptyLabel.translatesAutoresizingMaskIntoConstraints = false
-        errorTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        errorMessageLabel.translatesAutoresizingMaskIntoConstraints = false
-        retryButton.translatesAutoresizingMaskIntoConstraints = false
+        loadingView.configure(title: "Loading metrics...")
+        loadingView.isHidden = true
 
-        emptyLabel.text = "No metrics yet"
-        emptyLabel.textColor = .secondaryLabel
-        emptyLabel.font = .systemFont(ofSize: 17, weight: .medium)
-        emptyLabel.textAlignment = .center
-        emptyLabel.numberOfLines = 0    // без ограничений
-        emptyLabel.isHidden = true
+        emptyView.configure(title: "No metrics yet")
+        emptyView.isHidden = true
 
-        errorTitleLabel.textColor = .label
-        errorTitleLabel.font = .systemFont(ofSize: 20, weight: .bold)
-        errorTitleLabel.textAlignment = .center
-        errorTitleLabel.numberOfLines = 0
-        errorTitleLabel.isHidden = true
+        errorView.isHidden = true
+        errorView.onRetry = { [weak self] in
+            self?.handleRetryTap()
+        }
 
-        errorMessageLabel.textColor = .secondaryLabel
-        errorMessageLabel.font = .systemFont(ofSize: 15, weight: .regular)
-        errorMessageLabel.textAlignment = .center
-        errorMessageLabel.numberOfLines = 0
-        errorMessageLabel.isHidden = true
-
-        retryButton.setTitleColor(.systemBlue, for: .normal)
-        retryButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        retryButton.isHidden = true
-        retryButton.addTarget(self, action: #selector(handleRetryTap), for: .touchUpInside)
-
-        view.addSubview(activityIndicatorView)
-        view.addSubview(emptyLabel)
-        view.addSubview(errorTitleLabel)
-        view.addSubview(errorMessageLabel)
-        view.addSubview(retryButton)
+        view.addSubview(loadingView)
+        view.addSubview(emptyView)
+        view.addSubview(errorView)
 
         NSLayoutConstraint.activate([
-            activityIndicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicatorView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            loadingView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            loadingView.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: DS.Spacing.l),
+            loadingView.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -DS.Spacing.l),
 
-            emptyLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            emptyLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
-            emptyLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -24),
+            emptyView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            emptyView.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: DS.Spacing.l),
+            emptyView.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -DS.Spacing.l),
 
-            errorTitleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            errorTitleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -28),
-            errorTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            errorTitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-
-            errorMessageLabel.topAnchor.constraint(equalTo: errorTitleLabel.bottomAnchor, constant: 8),
-            errorMessageLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            errorMessageLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-
-            retryButton.topAnchor.constraint(equalTo: errorMessageLabel.bottomAnchor, constant: 16),
-            retryButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            errorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            errorView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            errorView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: DS.Spacing.l),
+            errorView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -DS.Spacing.l)
         ])
     }
 
     private func renderInitialState() {
         collectionView.isHidden = true
-        activityIndicatorView.stopAnimating()
-        emptyLabel.isHidden = true
-        errorTitleLabel.isHidden = true
-        errorMessageLabel.isHidden = true
-        retryButton.isHidden = true
+        loadingView.stopAnimating()
+        loadingView.isHidden = true
+        emptyView.isHidden = true
+        errorView.isHidden = true
     }
 
     private func renderLoadingState() {
         collectionView.isHidden = true
-        emptyLabel.isHidden = true
-        errorTitleLabel.isHidden = true
-        errorMessageLabel.isHidden = true
-        retryButton.isHidden = true
-        activityIndicatorView.startAnimating()
+        emptyView.isHidden = true
+        errorView.isHidden = true
+        loadingView.isHidden = false
+        loadingView.startAnimating()
     }
 
     private func renderContentState() {
         collectionView.isHidden = false
-        activityIndicatorView.stopAnimating()
-        emptyLabel.isHidden = true
-        errorTitleLabel.isHidden = true
-        errorMessageLabel.isHidden = true
-        retryButton.isHidden = true
+        loadingView.stopAnimating()
+        loadingView.isHidden = true
+        emptyView.isHidden = true
+        errorView.isHidden = true
     }
 
     private func renderEmptyState() {
         collectionView.isHidden = true
-        activityIndicatorView.stopAnimating()
-        emptyLabel.isHidden = false
-        errorTitleLabel.isHidden = true
-        errorMessageLabel.isHidden = true
-        retryButton.isHidden = true
+        loadingView.stopAnimating()
+        loadingView.isHidden = true
+        emptyView.isHidden = false
+        errorView.isHidden = true
     }
 
     private func renderErrorState(_ errorViewModel: EntriesListErrorViewModel) {
         collectionView.isHidden = true
-        activityIndicatorView.stopAnimating()
-        emptyLabel.isHidden = true
-        errorTitleLabel.isHidden = false
-        errorMessageLabel.isHidden = false
-        retryButton.isHidden = false
-
-        errorTitleLabel.text = errorViewModel.title
-        errorMessageLabel.text = errorViewModel.message
-        retryButton.setTitle(errorViewModel.actionTitle, for: .normal)
+        loadingView.stopAnimating()
+        loadingView.isHidden = true
+        emptyView.isHidden = true
+        errorView.isHidden = false
+        errorView.configure(
+            title: errorViewModel.title,
+            message: errorViewModel.message,
+            actionTitle: errorViewModel.actionTitle
+        )
     }
 
     @objc
@@ -205,7 +173,12 @@ final class EntriesListViewController: UIViewController, EntriesListView {
 
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 12
-        layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)    // внутр отступы
+        layout.sectionInset = UIEdgeInsets(
+            top: DS.Spacing.m,
+            left: DS.Spacing.m,
+            bottom: DS.Spacing.m,
+            right: DS.Spacing.m
+        )
 
         return layout
     }

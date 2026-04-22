@@ -35,14 +35,14 @@ final class EntriesListSectionHeaderView: UICollectionReusableView {
     }
 
     private func setupViews() {
-        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
-        titleLabel.textColor = .label
+        titleLabel.font = DS.Typography.sectionTitle()
+        titleLabel.textColor = DS.Colors.textPrimary
 
         chevronImageView.image = UIImage(systemName: "chevron.down")
-        chevronImageView.tintColor = .secondaryLabel    // ток для системных иконок 
-        chevronImageView.contentMode = .scaleAspectFit  // автомасштаб иконки
+        chevronImageView.tintColor = DS.Colors.textSecondary
+        chevronImageView.contentMode = .scaleAspectFit
 
-        button.addTarget(self, action: #selector(handleTap), for: .touchUpInside) // дефолт тап по кнопке
+        button.addTarget(self, action: #selector(handleTap), for: .touchUpInside)
 
         addSubview(titleLabel)
         addSubview(chevronImageView)
@@ -55,15 +55,15 @@ final class EntriesListSectionHeaderView: UICollectionReusableView {
         button.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: DS.Spacing.m),
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: DS.Spacing.s),
+            titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -DS.Spacing.s),
 
             chevronImageView.leadingAnchor.constraint(greaterThanOrEqualTo: titleLabel.trailingAnchor, constant: 12),
-            chevronImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            chevronImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -DS.Spacing.m),
             chevronImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            chevronImageView.widthAnchor.constraint(equalToConstant: 16),
-            chevronImageView.heightAnchor.constraint(equalToConstant: 16),
+            chevronImageView.widthAnchor.constraint(equalToConstant: DS.Size.chevron),
+            chevronImageView.heightAnchor.constraint(equalToConstant: DS.Size.chevron),
 
             button.topAnchor.constraint(equalTo: topAnchor),
             button.leadingAnchor.constraint(equalTo: leadingAnchor),
