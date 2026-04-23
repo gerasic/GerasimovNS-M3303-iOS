@@ -107,3 +107,72 @@
 ### Что происходит по tap
 
 - Тап по ячейке метрики открывает экран `Metric Details`.
+
+## Лабораторная 6: Дизайн-система и применение в приложении
+
+### Токены дизайн-системы
+
+Дизайн-система вынесена в папку `DesignSystem`.
+
+Реализованы токены:
+- `DS.Colors`
+  - `background`
+  - `surface`
+  - `primary`
+  - `textPrimary`
+  - `textSecondary`
+  - `error`
+  - `success`
+  - `separator`
+  - `disabled`
+- `DS.Typography`
+  - `screenTitle`
+  - `sectionTitle`
+  - `body`
+  - `bodyMedium`
+  - `bodySemibold`
+  - `caption`
+  - `footnote`
+  - `button`
+- `DS.Spacing`
+  - `xs`
+  - `s`
+  - `m`
+  - `l`
+  - `xl`
+- `DS.CornerRadius`
+  - `small`
+  - `medium`
+  - `large`
+
+### Компоненты дизайн-системы
+
+Реализованы переиспользуемые UI-компоненты:
+- `DSButton`
+  - стили `primary` и `secondary`
+  - состояния `enabled`, `disabled`, `loading`
+  - настройка через полную `DSButton.Configuration`
+- `DSLoadingView`
+  - индикатор загрузки + текст
+- `DSErrorView`
+  - заголовок ошибки + сообщение + `Retry`
+- `DSEmptyView`
+  - отображение пустого состояния
+
+### Где применено
+
+Дизайн-система применена на экранах:
+- `AuthViewController`
+- `EntriesListViewController`
+
+Дополнительно токены применены в переиспользуемых элементах списка:
+- `EntriesListMetricCell`
+- `EntriesListSectionHeaderView`
+
+### Где лежит дизайн-система
+
+- `tracker/DesignSystem/DS.swift`
+- `tracker/DesignSystem/Components/DSButton.swift`
+- `tracker/DesignSystem/Components/DSLoadingView.swift`
+- `tracker/DesignSystem/Components/DSErrorView.swift`
+- `tracker/DesignSystem/Components/DSEmptyView.swift`

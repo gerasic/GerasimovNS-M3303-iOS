@@ -8,7 +8,7 @@ final class AuthViewController: UIViewController, AuthView {
     private let emailTextField = UITextField()
     private let passwordTextField = UITextField()
     private let errorLabel = UILabel()
-    private let loginButton = UIButton(type: .system)
+    private let loginButton = DSButton()
 
     init(viewModel: AuthViewModelInput) {
         self.viewModel = viewModel
@@ -27,7 +27,7 @@ final class AuthViewController: UIViewController, AuthView {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Login"
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = DS.Colors.background
 
         setupViews()
         setupLayout()
@@ -70,27 +70,23 @@ final class AuthViewController: UIViewController, AuthView {
 
     private func setupViews() {
         titleLabel.text = "Sign In"
-        titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
+        titleLabel.font = DS.Typography.screenTitle()
+        titleLabel.textColor = DS.Colors.textPrimary
         titleLabel.textAlignment = .center
 
-        emailTextField.placeholder = "Email"            // серый текст-подсказка внутри
-        emailTextField.borderStyle = .roundedRect       
-        emailTextField.keyboardType = .emailAddress     // кейборд под имейл 
-        emailTextField.autocapitalizationType = .none   // автозаглавные буквы
-        emailTextField.autocorrectionType = .no         // т9
+        configureTextField(emailTextField, placeholder: "Email")
+        emailTextField.keyboardType = .emailAddress
 
-        passwordTextField.placeholder = "Password"
-        passwordTextField.borderStyle = .roundedRect
-        passwordTextField.isSecureTextEntry = true      // скрывание букв
+        configureTextField(passwordTextField, placeholder: "Password")
+        passwordTextField.isSecureTextEntry = true
         passwordTextField.autocapitalizationType = .none
-        passwordTextField.autocorrectionType = .no
-
-        errorLabel.textColor = .systemRed
-        errorLabel.font = .systemFont(ofSize: 14)
-        errorLabel.numberOfLines = 0                    // = 0 снять огран на колво строк
+        
+        errorLabel.textColor = DS.Colors.error
+        errorLabel.font = DS.Typography.footnote()
+        errorLabel.numberOfLines = 0
         errorLabel.isHidden = true
 
-        loginButton.setTitle("Log In", for: .normal)
+        configureLoginButton(isLoading: false)
 
         [
             scrollView,
@@ -129,35 +125,33 @@ final class AuthViewController: UIViewController, AuthView {
             contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
 
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
 
-            emailTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
-            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-            emailTextField.heightAnchor.constraint(equalToConstant: 44),
+            emailTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: DS.Spacing.xl),
+            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
+            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
+            emailTextField.heightAnchor.constraint(equalToConstant: DS.Size.textFieldHeight),
 
-            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
-            passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-            passwordTextField.heightAnchor.constraint(equalToConstant: 44),
+            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: DS.Spacing.m),
+            passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
+            passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
+            passwordTextField.heightAnchor.constraint(equalToConstant: DS.Size.textFieldHeight),
 
             errorLabel.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 12),
-            errorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            errorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            errorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
+            errorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
 
-            loginButton.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 24),
-            loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-            loginButton.heightAnchor.constraint(equalToConstant: 50),
-            loginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
+            loginButton.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: DS.Spacing.l),
+            loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
+            loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
+            loginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -DS.Spacing.l)
         ])
     }
 
     private func setupActions() {
         emailTextField.addTarget(self, action: #selector(didChangeEmail), for: .editingChanged)
         passwordTextField.addTarget(self, action: #selector(didChangePassword), for: .editingChanged)
-        loginButton.addTarget(self, action: #selector(didTapLogin), for: .touchUpInside)
     }
 
     private func setupKeyboardObservers() {
@@ -187,7 +181,35 @@ final class AuthViewController: UIViewController, AuthView {
     private func setLoading(_ isLoading: Bool) {
         emailTextField.isEnabled = !isLoading
         passwordTextField.isEnabled = !isLoading
-        loginButton.isEnabled = !isLoading
+        configureLoginButton(isLoading: isLoading)
+    }
+
+    private func configureLoginButton(isLoading: Bool) {
+        loginButton.configure(
+            DSButton.Configuration(
+                title: isLoading ? "Loading..." : "Log In",
+                style: .primary,
+                state: isLoading ? .loading : .enabled,
+                action: { [weak self] in
+                    self?.didTapLogin()
+                }
+            )
+        )
+    }
+
+    private func configureTextField(_ textField: UITextField, placeholder: String) {
+        textField.placeholder = placeholder
+        textField.font = DS.Typography.body()
+        textField.textColor = DS.Colors.textPrimary
+        textField.backgroundColor = DS.Colors.surface
+        textField.layer.cornerRadius = DS.CornerRadius.medium
+        textField.layer.borderWidth = 1
+        textField.layer.borderColor = DS.Colors.separator.cgColor
+        textField.autocapitalizationType = .none
+        textField.autocorrectionType = .no
+        textField.clearButtonMode = .whileEditing
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: DS.Spacing.m, height: 1))
+        textField.leftViewMode = .always
     }
 
     @objc private func keyboardWillChangeFrame(_ notification: Notification) {
