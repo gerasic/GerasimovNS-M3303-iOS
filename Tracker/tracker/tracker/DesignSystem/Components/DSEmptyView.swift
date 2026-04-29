@@ -1,7 +1,7 @@
 import UIKit
 
 final class DSEmptyView: UIView {
-    private let titleLabel = UILabel()
+    private let titleLabel = DSLabel()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -20,11 +20,14 @@ final class DSEmptyView: UIView {
 
     private func setupViews() {
         translatesAutoresizingMaskIntoConstraints = false
-
-        titleLabel.font = DS.Typography.bodyMedium()
-        titleLabel.textColor = DS.Colors.textSecondary
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
+        titleLabel.configure(
+            .init(
+                typography: .bodyMedium,
+                textColor: .textSecondary,
+                alignment: .center,
+                numberOfLines: 0
+            )
+        )
 
         addSubview(titleLabel)
     }

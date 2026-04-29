@@ -1,9 +1,9 @@
 import UIKit
 
 final class DSLoadingView: UIView {
-    private let stackView = UIStackView()
+    private let stackView = DSStackView()
     private let activityIndicatorView = UIActivityIndicatorView(style: .large)
-    private let titleLabel = UILabel()
+    private let titleLabel = DSLabel()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -31,14 +31,23 @@ final class DSLoadingView: UIView {
     private func setupViews() {
         translatesAutoresizingMaskIntoConstraints = false
 
-        stackView.axis = .vertical
-        stackView.alignment = .center
-        stackView.spacing = DS.Spacing.m
+        stackView.configure(
+            .init(
+                axis: .vertical,
+                spacing: .m,
+                alignment: .center,
+                distribution: .fill
+            )
+        )
 
-        titleLabel.font = DS.Typography.body()
-        titleLabel.textColor = DS.Colors.textSecondary
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
+        titleLabel.configure(
+            .init(
+                typography: .body,
+                textColor: .textSecondary,
+                alignment: .center,
+                numberOfLines: 0
+            )
+        )
 
         stackView.addArrangedSubview(activityIndicatorView)
         stackView.addArrangedSubview(titleLabel)
@@ -46,8 +55,6 @@ final class DSLoadingView: UIView {
     }
 
     private func setupLayout() {
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: topAnchor),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),

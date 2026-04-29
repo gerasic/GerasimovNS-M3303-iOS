@@ -1,0 +1,83 @@
+{
+  "id": "auth_root_scroll",
+  "type": "scrollView",
+  "subviews": [
+    {
+      "id": "auth_root_stack",
+      "type": "stackView",
+      "layout": {
+        "axis": "vertical",
+        "spacing": "m",
+        "insets": {
+          "top": "xl",
+          "leading": "l",
+          "bottom": "l",
+          "trailing": "l"
+        }
+      },
+      "subviews": [
+        {
+          "type": "label",
+          "content": {
+            "text": "Sign In",
+            "textColor": "textPrimary",
+            "typography": "screenTitle",
+            "alignment": "center",
+            "numberOfLines": 1
+          }
+        },
+        {
+          "type": "spacer",
+          "content": {
+            "size": "m"
+          }
+        },
+        {
+          "id": "auth_email_field",
+          "type": "textField",
+          "content": {
+            "placeholder": "Email",
+            "contentType": "email",
+            "keyboardType": "emailAddress"
+          }
+        },
+        {
+          "id": "auth_password_field",
+          "type": "textField",
+          "content": {
+            "placeholder": "Password",
+            "contentType": "password",
+            "keyboardType": "default"
+          }
+        },
+        {
+          "id": "auth_error_label",
+          "type": "label",
+          "content": {
+            "text": "",
+            "textColor": "error",
+            "typography": "footnote",
+            "alignment": "natural",
+            "numberOfLines": 0
+          },
+          "layout": {
+            "isHidden": true
+          }
+        },
+        {
+          "id": "auth_login_button",
+          "type": "button",
+          "content": {
+            "title": "Log In",
+            "style": "primary",
+            "state": "enabled"
+          },
+          "action": {
+            "type": "submit",
+            "target": "login"
+          }
+        }
+      ]
+    }
+  ]
+}

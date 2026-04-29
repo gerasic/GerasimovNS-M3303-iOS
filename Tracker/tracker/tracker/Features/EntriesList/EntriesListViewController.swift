@@ -4,9 +4,12 @@ final class EntriesListViewController: UIViewController, EntriesListView {
     private let viewModel: EntriesListViewModelInput
     private let collectionView: UICollectionView
     private let collectionManager = EntriesListCollectionManager()
-    private let loadingView = DSLoadingView()
-    private let emptyView = DSEmptyView()
-    private let errorView = DSErrorView()
+    private let stateActionHandler = DefaultBDUIActionHandler()
+    private lazy var mapper: BDUIViewMapping = DefaultBDUIViewMapper(actionHandler: stateActionHandler)
+
+    private lazy var loadingView: UIView = makeStateView(resourceName: "entries_loading_state")
+    private lazy var emptyView: UIView = makeStateView(resourceName: "entries_empty_state")
+    private lazy var errorView: UIView = makeStateView(resourceName: "entries_error_state")
 
     init(viewModel: EntriesListViewModelInput) {
         self.viewModel = viewModel
@@ -85,14 +88,11 @@ final class EntriesListViewController: UIViewController, EntriesListView {
     }
 
     private func setupStateViews() {
-        loadingView.configure(title: "Loading metrics...")
         loadingView.isHidden = true
-
-        emptyView.configure(title: "No metrics yet")
         emptyView.isHidden = true
-
         errorView.isHidden = true
-        errorView.onRetry = { [weak self] in
+
+        stateActionHandler.onReload = { [weak self] in
             self?.handleRetryTap()
         }
 
@@ -120,7 +120,7 @@ final class EntriesListViewController: UIViewController, EntriesListView {
 
     private func renderInitialState() {
         collectionView.isHidden = true
-        loadingView.stopAnimating()
+        (loadingView as? DSLoadingView)?.stopAnimating()
         loadingView.isHidden = true
         emptyView.isHidden = true
         errorView.isHidden = true
@@ -131,12 +131,12 @@ final class EntriesListViewController: UIViewController, EntriesListView {
         emptyView.isHidden = true
         errorView.isHidden = true
         loadingView.isHidden = false
-        loadingView.startAnimating()
+        (loadingView as? DSLoadingView)?.startAnimating()
     }
 
     private func renderContentState() {
         collectionView.isHidden = false
-        loadingView.stopAnimating()
+        (loadingView as? DSLoadingView)?.stopAnimating()
         loadingView.isHidden = true
         emptyView.isHidden = true
         errorView.isHidden = true
@@ -144,7 +144,7 @@ final class EntriesListViewController: UIViewController, EntriesListView {
 
     private func renderEmptyState() {
         collectionView.isHidden = true
-        loadingView.stopAnimating()
+        (loadingView as? DSLoadingView)?.stopAnimating()
         loadingView.isHidden = true
         emptyView.isHidden = false
         errorView.isHidden = true
@@ -152,11 +152,12 @@ final class EntriesListViewController: UIViewController, EntriesListView {
 
     private func renderErrorState(_ errorViewModel: EntriesListErrorViewModel) {
         collectionView.isHidden = true
-        loadingView.stopAnimating()
+        (loadingView as? DSLoadingView)?.stopAnimating()
         loadingView.isHidden = true
         emptyView.isHidden = true
         errorView.isHidden = false
-        errorView.configure(
+
+        (errorView as? DSErrorView)?.configure(
             title: errorViewModel.title,
             message: errorViewModel.message,
             actionTitle: errorViewModel.actionTitle
@@ -181,5 +182,24 @@ final class EntriesListViewController: UIViewController, EntriesListView {
         )
 
         return layout
+    }
+
+    private func makeStateView(resourceName: String) -> UIView {
+        do {
+            let node = try BDUIResourceLoader.loadNode(named: resourceName, subdirectory: "BDUI")
+            return mapper.makeView(from: node)
+        } catch {
+            let fallbackLabel = DSLabel()
+            fallbackLabel.configure(
+                .init(
+                    text: error.localizedDescription,
+                    typography: .footnote,
+                    textColor: .error,
+                    alignment: .center,
+                    numberOfLines: 0
+                )
+            )
+            return fallbackLabel
+        }
     }
 }

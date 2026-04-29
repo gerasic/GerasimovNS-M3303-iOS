@@ -1,0 +1,12 @@
+{
+  "id": "entries_error_view",
+  "type": "errorView",
+  "content": {
+    "title": "Unable to load metrics",
+    "message": "Please try again.",
+    "actionTitle": "Retry"
+  },
+  "action": {
+    "type": "reload"
+  }
+}
