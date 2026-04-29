@@ -1,0 +1,7 @@
+{
+  "id": "entries_loading_view",
+  "type": "loadingView",
+  "content": {
+    "title": "Loading metrics..."
+  }
+}

@@ -1,12 +1,12 @@
 import UIKit
 
 final class DSButton: UIButton {
-    enum Style {
+    enum Style: String, Decodable {
         case primary
         case secondary
     }
 
-    enum State {
+    enum State: String, Decodable {
         case enabled
         case disabled
         case loading

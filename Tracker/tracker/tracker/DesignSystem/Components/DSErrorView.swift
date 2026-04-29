@@ -1,9 +1,9 @@
 import UIKit
 
 final class DSErrorView: UIView {
-    private let stackView = UIStackView()
-    private let titleLabel = UILabel()
-    private let messageLabel = UILabel()
+    private let stackView = DSStackView()
+    private let titleLabel = DSLabel()
+    private let messageLabel = DSLabel()
     private let actionButton = DSButton()
 
     var onRetry: (() -> Void)?
@@ -28,19 +28,32 @@ final class DSErrorView: UIView {
     private func setupViews() {
         translatesAutoresizingMaskIntoConstraints = false
 
-        stackView.axis = .vertical
-        stackView.alignment = .fill
-        stackView.spacing = DS.Spacing.s
+        stackView.configure(
+            .init(
+                axis: .vertical,
+                spacing: .s,
+                alignment: .fill,
+                distribution: .fill
+            )
+        )
 
-        titleLabel.font = DS.Typography.sectionTitle()
-        titleLabel.textColor = DS.Colors.textPrimary
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
+        titleLabel.configure(
+            .init(
+                typography: .sectionTitle,
+                textColor: .textPrimary,
+                alignment: .center,
+                numberOfLines: 0
+            )
+        )
 
-        messageLabel.font = DS.Typography.body()
-        messageLabel.textColor = DS.Colors.textSecondary
-        messageLabel.textAlignment = .center
-        messageLabel.numberOfLines = 0
+        messageLabel.configure(
+            .init(
+                typography: .body,
+                textColor: .textSecondary,
+                alignment: .center,
+                numberOfLines: 0
+            )
+        )
 
         configureActionButton(title: "Retry")
 
@@ -51,8 +64,6 @@ final class DSErrorView: UIView {
     }
 
     private func setupLayout() {
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: topAnchor),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),

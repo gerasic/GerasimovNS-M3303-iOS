@@ -125,6 +125,7 @@
   - `success`
   - `separator`
   - `disabled`
+  - token API через `DS.ColorToken`
 - `DS.Typography`
   - `screenTitle`
   - `sectionTitle`
@@ -134,16 +135,33 @@
   - `caption`
   - `footnote`
   - `button`
+  - token API через `DS.TypographyToken`
 - `DS.Spacing`
+  - `none`
   - `xs`
   - `s`
   - `m`
   - `l`
   - `xl`
+  - token API через `DS.SpacingToken`
 - `DS.CornerRadius`
+  - `none`
   - `small`
   - `medium`
   - `large`
+  - token API через `DS.CornerRadiusToken`
+- `DS.Size`
+  - `textFieldHeight`
+  - `buttonHeight`
+  - `statusIndicator`
+  - `chevron`
+  - token API через `DS.SizeToken`
+- layout tokens
+  - `DS.TextAlignmentToken`
+  - `DS.AxisToken`
+  - `DS.StackAlignmentToken`
+  - `DS.StackDistributionToken`
+  - `DS.Insets`
 
 ### Компоненты дизайн-системы
 
@@ -158,6 +176,30 @@
   - заголовок ошибки + сообщение + `Retry`
 - `DSEmptyView`
   - отображение пустого состояния
+- `DSLabel`
+  - типографика, цвет, alignment, multiline через токены DS
+- `DSStackView`
+  - axis, spacing, alignment, distribution, insets через токены DS
+- `DSContainerView`
+  - background, corner radius, border через токены DS
+- `DSScrollView`
+  - базовый scroll-контейнер для form/BDUI экранов
+- `DSSeparatorView`
+  - разделитель с DS-цветом и толщиной
+- `DSSpacerView`
+  - layout spacer на основе spacing token
+
+### Готовность для Лабораторной 7
+
+DS расширена так, чтобы BDUI-слой можно было строить поверх неё, а не поверх произвольного UIKit API.
+
+Для BDUI теперь есть:
+- токены, которые можно декодировать из JSON без прямой зависимости от `UIColor`, `UIFont` и `UIStackView` enums;
+- контейнеры `DSContainerView`, `DSScrollView`, `DSStackView`;
+- текстовый компонент `DSLabel`;
+- вспомогательные layout-компоненты `DSSeparatorView` и `DSSpacerView`;
+- существующие state-компоненты `DSLoadingView`, `DSErrorView`, `DSEmptyView`;
+- интерактивные элементы `DSButton` и `DSTextField`.
 
 ### Где применено
 
@@ -173,6 +215,12 @@
 
 - `tracker/DesignSystem/DS.swift`
 - `tracker/DesignSystem/Components/DSButton.swift`
+- `tracker/DesignSystem/Components/DSLabel.swift`
+- `tracker/DesignSystem/Components/DSStackView.swift`
+- `tracker/DesignSystem/Components/DSContainerView.swift`
+- `tracker/DesignSystem/Components/DSScrollView.swift`
+- `tracker/DesignSystem/Components/DSSeparatorView.swift`
+- `tracker/DesignSystem/Components/DSSpacerView.swift`
 - `tracker/DesignSystem/Components/DSLoadingView.swift`
 - `tracker/DesignSystem/Components/DSErrorView.swift`
 - `tracker/DesignSystem/Components/DSEmptyView.swift`

@@ -1,14 +1,23 @@
 import UIKit
 
 final class AuthViewController: UIViewController, AuthView {
+    private enum ViewID {
+        static let emailField = "auth_email_field"
+        static let passwordField = "auth_password_field"
+        static let errorLabel = "auth_error_label"
+        static let loginButton = "auth_login_button"
+    }
+
     private let viewModel: AuthViewModelInput
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    private let titleLabel = UILabel()
-    private let emailTextField = UITextField()
-    private let passwordTextField = UITextField()
-    private let errorLabel = UILabel()
-    private let loginButton = DSButton()
+    private let actionHandler = DefaultBDUIActionHandler()
+    private lazy var mapper: BDUIViewMapping = DefaultBDUIViewMapper(actionHandler: actionHandler)
+
+    private weak var renderedRootView: UIView?
+    private weak var scrollView: UIScrollView?
+    private weak var emailTextField: DSTextField?
+    private weak var passwordTextField: DSTextField?
+    private weak var errorLabel: DSLabel?
+    private weak var loginButton: DSButton?
 
     init(viewModel: AuthViewModelInput) {
         self.viewModel = viewModel
@@ -29,9 +38,7 @@ final class AuthViewController: UIViewController, AuthView {
         title = "Login"
         view.backgroundColor = DS.Colors.background
 
-        setupViews()
-        setupLayout()
-        setupActions()
+        setupBDUIScreen()
         setupKeyboardObservers()
 
         viewModel.didLoad()
@@ -41,117 +48,91 @@ final class AuthViewController: UIViewController, AuthView {
         switch state {
         case .initial:
             setLoading(false)
-            errorLabel.isHidden = true
-            errorLabel.text = nil
+            errorLabel?.isHidden = true
+            errorLabel?.text = nil
         case let .editing(email, password):
             setLoading(false)
-            errorLabel.isHidden = true
-            errorLabel.text = nil
-            if emailTextField.text != email {
-                emailTextField.text = email
+            errorLabel?.isHidden = true
+            errorLabel?.text = nil
+
+            if emailTextField?.text != email {
+                emailTextField?.text = email
             }
-            if passwordTextField.text != password {
-                passwordTextField.text = password
+
+            if passwordTextField?.text != password {
+                passwordTextField?.text = password
             }
         case .loading:
             setLoading(true)
-            errorLabel.isHidden = true
-            errorLabel.text = nil
+            errorLabel?.isHidden = true
+            errorLabel?.text = nil
         case let .error(message):
             setLoading(false)
-            errorLabel.isHidden = false
-            errorLabel.text = message
+            errorLabel?.isHidden = false
+            errorLabel?.text = message
         case .content:
             setLoading(false)
-            errorLabel.isHidden = true
-            errorLabel.text = nil
+            errorLabel?.isHidden = true
+            errorLabel?.text = nil
         }
     }
 
-    private func setupViews() {
-        titleLabel.text = "Sign In"
-        titleLabel.font = DS.Typography.screenTitle()
-        titleLabel.textColor = DS.Colors.textPrimary
-        titleLabel.textAlignment = .center
+    private func setupBDUIScreen() {
+        actionHandler.onSubmit = { [weak self] target in
+            guard target == "login" else { return }
+            self?.didTapLogin()
+        }
 
-        configureTextField(emailTextField, placeholder: "Email")
-        emailTextField.keyboardType = .emailAddress
+        do {
+            let node = try BDUIResourceLoader.loadNode(named: "auth_screen", subdirectory: "BDUI")
+            let renderedView = mapper.makeView(from: node)
+            renderedRootView = renderedView
+            scrollView = renderedView as? UIScrollView
 
-        configureTextField(passwordTextField, placeholder: "Password")
-        passwordTextField.isSecureTextEntry = true
-        passwordTextField.autocapitalizationType = .none
-        
-        errorLabel.textColor = DS.Colors.error
-        errorLabel.font = DS.Typography.footnote()
-        errorLabel.numberOfLines = 0
-        errorLabel.isHidden = true
+            view.addSubview(renderedView)
 
-        configureLoginButton(isLoading: false)
+            NSLayoutConstraint.activate([
+                renderedView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                renderedView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                renderedView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                renderedView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
 
-        [
-            scrollView,
-            contentView,
-            titleLabel,
-            emailTextField,
-            passwordTextField,
-            errorLabel,
-            loginButton
-        ].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false     // отключить автоконстрейнты
+            bindRenderedViews()
+            configureLoginButton(isLoading: false)
+        } catch {
+            let fallbackLabel = DSLabel()
+            fallbackLabel.configure(
+                .init(
+                    text: error.localizedDescription,
+                    typography: .footnote,
+                    textColor: .error,
+                    alignment: .center,
+                    numberOfLines: 0
+                )
+            )
+
+            view.addSubview(fallbackLabel)
+
+            NSLayoutConstraint.activate([
+                fallbackLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                fallbackLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                fallbackLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: DS.Spacing.l),
+                fallbackLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -DS.Spacing.l)
+            ])
         }
     }
 
-    private func setupLayout() {
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
+    private func bindRenderedViews() {
+        guard let renderedRootView else { return }
 
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(emailTextField)
-        contentView.addSubview(passwordTextField)
-        contentView.addSubview(errorLabel)
-        contentView.addSubview(loginButton)
+        emailTextField = renderedRootView.bduiView(withId: ViewID.emailField)
+        passwordTextField = renderedRootView.bduiView(withId: ViewID.passwordField)
+        errorLabel = renderedRootView.bduiView(withId: ViewID.errorLabel)
+        loginButton = renderedRootView.bduiView(withId: ViewID.loginButton)
 
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
-            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-
-            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
-
-            emailTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: DS.Spacing.xl),
-            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
-            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
-            emailTextField.heightAnchor.constraint(equalToConstant: DS.Size.textFieldHeight),
-
-            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: DS.Spacing.m),
-            passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
-            passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
-            passwordTextField.heightAnchor.constraint(equalToConstant: DS.Size.textFieldHeight),
-
-            errorLabel.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 12),
-            errorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
-            errorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
-
-            loginButton.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: DS.Spacing.l),
-            loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.l),
-            loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.l),
-            loginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -DS.Spacing.l)
-        ])
-    }
-
-    private func setupActions() {
-        emailTextField.addTarget(self, action: #selector(didChangeEmail), for: .editingChanged)
-        passwordTextField.addTarget(self, action: #selector(didChangePassword), for: .editingChanged)
+        emailTextField?.addTarget(self, action: #selector(didChangeEmail), for: .editingChanged)
+        passwordTextField?.addTarget(self, action: #selector(didChangePassword), for: .editingChanged)
     }
 
     private func setupKeyboardObservers() {
@@ -164,56 +145,49 @@ final class AuthViewController: UIViewController, AuthView {
     }
 
     @objc private func didChangeEmail() {
-        viewModel.didChangeEmail(emailTextField.text)
+        viewModel.didChangeEmail(emailTextField?.text)
     }
 
     @objc private func didChangePassword() {
-        viewModel.didChangePassword(passwordTextField.text)
+        viewModel.didChangePassword(passwordTextField?.text)
     }
 
     @objc private func didTapLogin() {
         viewModel.didTapLogin(
-            email: emailTextField.text,
-            password: passwordTextField.text
+            email: emailTextField?.text,
+            password: passwordTextField?.text
         )
     }
 
     private func setLoading(_ isLoading: Bool) {
-        emailTextField.isEnabled = !isLoading
-        passwordTextField.isEnabled = !isLoading
+        emailTextField?.isEnabled = !isLoading
+        passwordTextField?.isEnabled = !isLoading
         configureLoginButton(isLoading: isLoading)
     }
 
     private func configureLoginButton(isLoading: Bool) {
-        loginButton.configure(
-            DSButton.Configuration(
+        loginButton?.configure(
+            .init(
                 title: isLoading ? "Loading..." : "Log In",
                 style: .primary,
                 state: isLoading ? .loading : .enabled,
                 action: { [weak self] in
-                    self?.didTapLogin()
+                    self?.actionHandler.handle(
+                        BDUIAction(
+                            type: .submit,
+                            destination: nil,
+                            message: nil,
+                            target: "login"
+                        )
+                    )
                 }
             )
         )
     }
 
-    private func configureTextField(_ textField: UITextField, placeholder: String) {
-        textField.placeholder = placeholder
-        textField.font = DS.Typography.body()
-        textField.textColor = DS.Colors.textPrimary
-        textField.backgroundColor = DS.Colors.surface
-        textField.layer.cornerRadius = DS.CornerRadius.medium
-        textField.layer.borderWidth = 1
-        textField.layer.borderColor = DS.Colors.separator.cgColor
-        textField.autocapitalizationType = .none
-        textField.autocorrectionType = .no
-        textField.clearButtonMode = .whileEditing
-        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: DS.Spacing.m, height: 1))
-        textField.leftViewMode = .always
-    }
-
     @objc private func keyboardWillChangeFrame(_ notification: Notification) {
         guard
+            let scrollView,
             let userInfo = notification.userInfo,
             let endFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
         else {
