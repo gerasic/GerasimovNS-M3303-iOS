@@ -32,32 +32,32 @@ final class EntriesListMetricCell: UICollectionViewCell {
         titleLabel.text = viewModel.title
         valueLabel.text = viewModel.todayValueText
         unitLabel.text = viewModel.unitText
-        statusIndicatorView.backgroundColor = viewModel.isFilledToday ? .systemGreen : .systemGray3
+        statusIndicatorView.backgroundColor = viewModel.isFilledToday ? DS.Colors.success : DS.Colors.disabled
     }
 
     private func setupViews() {
-        contentView.backgroundColor = .secondarySystemBackground
-        contentView.layer.cornerRadius = 16
-        contentView.layer.masksToBounds = true // обрезаем все что выходит за рамки
+        contentView.backgroundColor = DS.Colors.surface
+        contentView.layer.cornerRadius = DS.CornerRadius.large
+        contentView.layer.masksToBounds = true
 
-        titleLabel.font = .systemFont(ofSize: 17, weight: .semibold)
-        titleLabel.textColor = .label
-        titleLabel.numberOfLines = 2 // 2 строки макс или обрез
+        titleLabel.font = DS.Typography.bodySemibold()
+        titleLabel.textColor = DS.Colors.textPrimary
+        titleLabel.numberOfLines = 2
 
-        valueLabel.font = .systemFont(ofSize: 17, weight: .medium)
-        valueLabel.textColor = .label
+        valueLabel.font = DS.Typography.bodyMedium()
+        valueLabel.textColor = DS.Colors.textPrimary
         valueLabel.textAlignment = .right
 
-        unitLabel.font = .systemFont(ofSize: 13, weight: .regular)
-        unitLabel.textColor = .secondaryLabel
+        unitLabel.font = DS.Typography.caption()
+        unitLabel.textColor = DS.Colors.textSecondary
         unitLabel.textAlignment = .right
 
-        statusIndicatorView.layer.cornerRadius = 5
+        statusIndicatorView.layer.cornerRadius = DS.Size.statusIndicator / 2
         statusIndicatorView.layer.masksToBounds = true
 
         valueStackView.axis = .vertical
-        valueStackView.alignment = .trailing    // == right
-        valueStackView.spacing = 4              // спейс между эл-ми
+        valueStackView.alignment = .trailing
+        valueStackView.spacing = DS.Spacing.xs
 
         valueStackView.addArrangedSubview(valueLabel)
         valueStackView.addArrangedSubview(unitLabel)
@@ -73,18 +73,18 @@ final class EntriesListMetricCell: UICollectionViewCell {
         valueStackView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            statusIndicatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            statusIndicatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: DS.Spacing.m),
             statusIndicatorView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            statusIndicatorView.widthAnchor.constraint(equalToConstant: 10),
-            statusIndicatorView.heightAnchor.constraint(equalToConstant: 10),
+            statusIndicatorView.widthAnchor.constraint(equalToConstant: DS.Size.statusIndicator),
+            statusIndicatorView.heightAnchor.constraint(equalToConstant: DS.Size.statusIndicator),
 
             titleLabel.leadingAnchor.constraint(equalTo: statusIndicatorView.trailingAnchor, constant: 12),
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -16),
+            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: DS.Spacing.m),
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -DS.Spacing.m),
             titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
 
             valueStackView.leadingAnchor.constraint(greaterThanOrEqualTo: titleLabel.trailingAnchor, constant: 12),
-            valueStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            valueStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -DS.Spacing.m),
             valueStackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
